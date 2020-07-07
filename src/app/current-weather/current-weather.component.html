@@ -2,15 +2,20 @@
   no data
 </div>
 <div *ngIf="current">
-  <div>
-    <span>{{current.city}}, {{current.country}}</span>
-    <span>{{current.date | date:'fullDate'}}</span>
+  <div fxLayout="row">
+    <div class="mat-title no-margin" fxFlex="66%">{{current.city}}, {{current.country}}</div>
+    <div class="right mat-h3 no-margin" fxFlex>
+      {{current.date | date:'EEEE'}}<br>
+      {{current.date | date: 'MMMM d'}}{{getOrdinal(current.date)}}
+    </div>
   </div>
-  <div>
-    <img [src]='current.image'>
-    <span>{{current.temperatur | number:'1.0-0'}} &#8451;</span>
+  <div fxLayout="row" fxLayoutAlign="center center">
+    <div fxFlex="66%"><img style="zoom: 175%" [src]='current.image'></div>
+    <div class="right mat-display-3 no-margin" fxFlex>{{current.temperatur | number:'1.0-0'}} 
+      <span class="unit">&#8451;</span>
+    </div>
   </div>
-  <div>
+  <div class="mat-caption" fxLayoutAlign="center">
     {{current.description}}
   </div>
 </div>
