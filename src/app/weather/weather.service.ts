@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-import {Observable} from 'rxjs';
+import { BehaviorSubject, Observable} from 'rxjs';
 import {ICurrentWeather} from '../interfaces';
 import {map} from 'rxjs/operators';
 
@@ -21,15 +21,24 @@ interface ICurrentWeatherData {
 }
 
 export interface IWeatherService {
+  readonly currentWeather$: BehaviorSubject<ICurrentWeather>;
   getCurrentWeather(search: string | number, country?: string): Observable<ICurrentWeather>;
   getCurrentWeatherByCoords(coords: Coordinates): Observable<ICurrentWeather>;
+  updateCurrentWeather(search: string | number, country?: string): void;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class WeatherService implements IWeatherService{
-
+  readonly currentWeather$ = new BehaviorSubject<ICurrentWeather>({
+    city: '--',
+    country: '--',
+    date: Date.now(),
+    image: '',
+    temperatur: 0,
+    description: '',
+  });
   constructor(private httpClient: HttpClient) { }
 
   getCurrentWeather(search: string | number, country?: string): Observable<ICurrentWeather> {
@@ -39,8 +48,11 @@ export class WeatherService implements IWeatherService{
         country ? `${search},${country}` : search
         );
 
-      return this.getCurrentWeatherHelper(uriParams);
+    } else {
+      uriParams = uriParams.set('zip', 'search');
     }
+
+    return this.getCurrentWeatherHelper(uriParams);
   }
 
   private getCurrentWeatherHelper(uriParams: HttpParams): Observable<ICurrentWeather> {
@@ -72,5 +84,10 @@ export class WeatherService implements IWeatherService{
       .set('lat', coords.latitude.toString())
       .set('lon', coords.longitude.toString());
     return this.getCurrentWeatherHelper(uriParams);
+  }
+
+  updateCurrentWeather(search: string | number, country?: string): void {
+    this.getCurrentWeather(search, country)
+      .subscribe(weather => this.currentWeather$.next(weather));
   }
 }
